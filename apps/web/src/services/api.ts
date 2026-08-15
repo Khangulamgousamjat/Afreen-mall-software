@@ -1,13 +1,19 @@
 import axios from 'axios';
 
 const getSanitizedApiHost = (): string => {
+  if (typeof window !== 'undefined') {
+    const customHost = localStorage.getItem('afreen_api_url');
+    if (customHost && customHost.trim()) {
+      return customHost.trim().replace(/\/$/, '').replace(/\/api\/v1$/, '');
+    }
+  }
+
   let url = import.meta.env.VITE_API_URL;
   if (!url || url.trim() === '') {
-    if (import.meta.env.DEV) return 'http://localhost:4000';
-    console.error(
-      '[Afreen Mall] VITE_API_URL is not set on this deployment. ' +
-      'Set it in Vercel → Project Settings → Environment Variables, then redeploy.'
-    );
+    // Default to localhost:4000 in dev and desktop, fallback to render cloud
+    if (import.meta.env.DEV || (typeof window !== 'undefined' && Boolean((window as any).desktopAPI?.isDesktop))) {
+      return 'http://localhost:4000';
+    }
     return 'https://afreen-mall.onrender.com';
   }
   url = url.trim().replace(/\/$/, '');

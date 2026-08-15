@@ -21,7 +21,7 @@ export default function Logo({
     hero: 280,
   };
 
-  const logoSrc = theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.jpg';
+  const logoSrc = theme === 'dark' ? './logo-dark.jpg' : './logo-light.jpg';
 
   return (
     <div

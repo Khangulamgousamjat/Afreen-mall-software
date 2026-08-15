@@ -25,6 +25,14 @@ function createMainWindow() {
     },
   });
 
+  // F12 to toggle DevTools, F5/Ctrl+R to reload
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12' && input.type === 'keyDown') {
+      mainWindow?.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
+
   // Smooth appearance once content is ready
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
@@ -44,17 +52,21 @@ function createMainWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    // In production, load built web bundle
-    const indexPath = path.join(__dirname, '../apps/web/dist/index.html');
-    if (fs.existsSync(indexPath)) {
-      mainWindow.loadFile(indexPath);
+    // In production, resolve index.html from app package
+    const possiblePaths = [
+      path.join(__dirname, '../apps/web/dist/index.html'),
+      path.join(app.getAppPath(), 'apps/web/dist/index.html'),
+      path.join(process.resourcesPath, 'app.asar/apps/web/dist/index.html'),
+      path.join(process.resourcesPath, 'app/apps/web/dist/index.html'),
+      path.join(__dirname, 'apps/web/dist/index.html'),
+    ];
+
+    const foundPath = possiblePaths.find((p) => fs.existsSync(p));
+    if (foundPath) {
+      mainWindow.loadFile(foundPath);
     } else {
-      const fallbackPath = path.join(app.getAppPath(), 'apps/web/dist/index.html');
-      if (fs.existsSync(fallbackPath)) {
-        mainWindow.loadFile(fallbackPath);
-      } else {
-        mainWindow.loadURL('http://localhost:5173');
-      }
+      console.warn('Could not find local index.html. Tried:', possiblePaths);
+      mainWindow.loadURL('http://localhost:3000');
     }
   }
 

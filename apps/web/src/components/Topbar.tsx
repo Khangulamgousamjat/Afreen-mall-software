@@ -5,7 +5,7 @@ import { Minus, Square, X, Maximize2, Wifi, WifiOff, Monitor } from 'lucide-reac
 
 export const Topbar: React.FC = () => {
   const { user, theme } = useAuth();
-  const logoSrc = theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.jpg';
+  const logoSrc = theme === 'dark' ? './logo-dark.jpg' : './logo-light.jpg';
   const isDesktop = isDesktopApp();
   const desktop = getDesktopAPI();
 

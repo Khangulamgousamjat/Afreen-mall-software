@@ -26,7 +26,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGoToLogin }) => 
       {/* Top-left logo header — matches every internal page */}
       <div style={{ position: 'absolute', top: '16px', left: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img
-          src={theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.jpg'}
+          src={theme === 'dark' ? './logo-dark.jpg' : './logo-light.jpg'}
           alt="Afreen Mall"
           style={{ height: '42px', width: 'auto', objectFit: 'contain' }}
           draggable={false}

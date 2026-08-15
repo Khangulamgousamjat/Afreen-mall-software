@@ -138,7 +138,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToWelcome, onLog
       {/* Top-left logo header */}
       <div style={{ position: 'absolute', top: '16px', left: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img
-          src={theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.jpg'}
+          src={theme === 'dark' ? './logo-dark.jpg' : './logo-light.jpg'}
           alt="Afreen Mall"
           style={{ height: '42px', width: 'auto', objectFit: 'contain' }}
           draggable={false}

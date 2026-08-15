@@ -16,7 +16,7 @@ export const AfreenMallLogo: React.FC<AfreenMallLogoProps> = ({ size = 'medium',
     huge: 320,
   };
 
-  const logoSrc = theme === 'dark' ? '/logo-dark.jpg' : '/logo-light.jpg';
+  const logoSrc = theme === 'dark' ? './logo-dark.jpg' : './logo-light.jpg';
 
   return (
     <img
