@@ -1,37 +1,37 @@
 {
-  "name": "afreen-mall",
+  "name": "afreen-mall-software",
+  "productName": "Afreen Mall Software",
   "version": "1.0.0",
+  "description": "Afreen Mall — Enterprise Operations Desktop Software",
+  "author": "Afreen Mall Enterprises",
   "private": true,
   "main": "dist-electron/main.js",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=apps/api\" \"npm run dev --workspace=apps/web\"",
-    "typecheck": "npm run build --workspace=packages/shared-types && tsc -p apps/api/tsconfig.json --noEmit && npm run typecheck --workspace=apps/web",
-    "build": "npm run build --workspace=packages/shared-types && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
-    "vercel-build": "npm run build",
-    "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
-    "test": "npm run test --workspace=apps/api",
-    "audit:fake-success": "node scripts/audit-fake-success.js",
-    "audit:auth-security": "node scripts/audit-auth-security.js",
-    "start": "node apps/api/dist/index.js",
-    "start:render": "npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-loss && node apps/api/dist/index.js",
-    "db:migrate": "npm run db:migrate --workspace=apps/api",
-    "db:seed": "npm run db:seed --workspace=apps/api",
+    "dev": "concurrently -k \"vite\" \"npm run desktop:compile\" \"wait-on http://localhost:3000 && electron dist-electron/main.js\"",
+    "build": "vite build && npm run desktop:compile",
     "desktop:compile": "tsc -p electron/tsconfig.json",
-    "desktop:dev": "concurrently -k \"npm run dev --workspace=@afreen-mall/api\" \"npm run dev --workspace=@afreen-mall/web\" \"wait-on http://localhost:5173 && npm run desktop:compile && electron dist-electron/main.js\"",
-    "desktop:start": "npm run desktop:compile && electron dist-electron/main.js",
-    "desktop:pack": "npm run build && npm run desktop:compile && electron-builder --dir",
-    "desktop:build": "npm run build && npm run desktop:compile && electron-builder --win"
+    "start": "npm run desktop:compile && electron dist-electron/main.js",
+    "pack": "npm run build && electron-builder --dir",
+    "make:exe": "npm run build && electron-builder --win",
+    "desktop:build": "npm run make:exe"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "lucide-react": "^0.330.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "^43.4.0",
     "electron-builder": "^26.15.3",
     "typescript": "^5.3.3",
+    "vite": "^5.1.4",
     "wait-on": "^9.1.0"
   }
 }

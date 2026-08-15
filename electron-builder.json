@@ -8,7 +8,7 @@
   },
   "files": [
     "dist-electron/**/*",
-    "apps/web/dist/**/*",
+    "dist/**/*",
     "package.json"
   ],
   "win": {

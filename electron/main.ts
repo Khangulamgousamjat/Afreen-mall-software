@@ -54,11 +54,11 @@ function createMainWindow() {
   } else {
     // In production, resolve index.html from app package
     const possiblePaths = [
-      path.join(__dirname, '../apps/web/dist/index.html'),
-      path.join(app.getAppPath(), 'apps/web/dist/index.html'),
-      path.join(process.resourcesPath, 'app.asar/apps/web/dist/index.html'),
-      path.join(process.resourcesPath, 'app/apps/web/dist/index.html'),
-      path.join(__dirname, 'apps/web/dist/index.html'),
+      path.join(__dirname, '../dist/index.html'),
+      path.join(app.getAppPath(), 'dist/index.html'),
+      path.join(process.resourcesPath, 'app.asar/dist/index.html'),
+      path.join(process.resourcesPath, 'app/dist/index.html'),
+      path.join(__dirname, 'dist/index.html'),
     ];
 
     const foundPath = possiblePaths.find((p) => fs.existsSync(p));
