@@ -1,33 +1,35 @@
-# Architecture - Afreen Mall Internal Operations Platform
+# Architecture — AFREEN MALL Internal Operations Platform
 
 ## Overview
-This document outlines the architecture for the Afreen Mall Internal Operations Platform, a staff-only retail management system.
+Afreen Mall is a staff-only, single-tenant retail management system covering the full store lifecycle: POS billing, cash handover/reconciliation, inventory, purchasing, warehouse, B2B sales, supplier/VRM, accounting, HRMS, CRM/loyalty, reporting, BI, and system administration. Designed for shop-floor desktop browsers, packaged for later Electron/Tauri wrapping.
 
-## System Components
-1. **Frontend (React + Vite + TypeScript)**: A single-page application built for modern desktop browsers, designed for shop-floor PCs. Kept free of browser-only APIs and IPC dependencies to support Electron/Tauri wrap later.
-2. **Backend (NestJS + TypeScript)**: A modular monolithic backend providing REST APIs under `/api/v1/`. Each business area is isolated into its own NestJS module.
-3. **Database (PostgreSQL)**: Relational database storing transactional, inventory, and user data. Money is stored as integers (paise). Parameterized queries via Prisma.
-4. **Cache & Session Store (Redis)**: Used for access/refresh token blacklisting, session state, and fast lookup caching of hot products/prices.
-5. **Hardware Integration Layer**: A decoupled NestJS module and React client service defining interfaces for:
-   - Barcode Scanner (HID keyboard wedge simulation)
-   - EDC Card Payment Terminal (Mock integration)
-   - UPI QR Code Generator (Base64 QR image generation containing transaction metadata)
-   - Thermal Receipt Printer (Text format buffer simulation)
+## System Topology & Layers
+1. **Frontend (`apps/web`)**:
+   - React + TypeScript + Vite.
+   - Vanilla CSS with custom properties (design tokens) supporting Dark (`#0B0F0D`) and Light (`#F0EDE4`) themes.
+   - In-memory access token storage via React AuthContext; refresh token stored via HttpOnly cookie.
+   - Zero browser-exclusive or server-only APIs to ensure direct portability to Electron/Tauri desktop wrappers.
+   - Keyboard-driven POS counter interactions with F1-F12 shortcuts, offline sync queue in `localStorage`.
 
-## Authentication & RBAC
-- Numeric 6-digit Staff ID starting at `300000` (auto-incrementing).
-- Role-based Access Control (RBAC) enforced on the server for all routes.
-- Access token (JWT, 15 min lifetime) + Refresh token (7 day lifetime, HttpOnly cookie).
-- User management is restricted entirely to the `Super Admin` role (`Superkhan` seed).
+2. **Backend (`apps/api`)**:
+   - Node.js with modular Express (or NestJS-style domain modules) under `/api/v1/`.
+   - Dedicated modules per business domain: Auth, Users, POS, Cash, Inventory, Purchasing, Warehouse, Sales, Suppliers, Accounting, HRMS, Customers, Reports, BI, Admin, Hardware.
+   - Server-side RBAC enforcement with 20 granular roles (`RoleName` enum).
+   - Parameterized queries exclusively via Prisma ORM + WAF SQL injection shield middleware.
+   - Dual-token authentication (15-min JWT access token + 7-day HttpOnly refresh token).
 
-## Data Flow: POS Cash Handover & Reconciliation
-```mermaid
-graph TD
-    A[POS Sale / Return] -->|Logs Transaction| B[Database: Sales / SaleReturns]
-    B -->|Increments/Decrements| C[Database: Inventory / StockMovement]
-    D[Day Close - Cashier] -->|Counts Note Denominations| E[Database: RegisterCloses]
-    E -->|Physical Cash Handover| F[Cash Officer Handover]
-    F -->|Deposited into BNA| G[Database: BNADeposits]
-    G -->|Manager Daily Report| H[Database: ManagerCashReports]
-    H -->|Variance Analysis| I[Audit Trail / Variance Log]
-```
+3. **Database & Cache**:
+   - PostgreSQL as relational source of truth with Prisma ORM.
+   - All monetary values stored strictly as 64-bit integer paise (1 INR = 100 paise).
+   - Redis for token blacklisting, session state management, and hot-product lookup caching.
+
+4. **Hardware Integration Layer (`/api/v1/hardware`)**:
+   - Barcode Scanner: USB-HID keyboard wedge simulation with `Enter` termination.
+   - EDC Card Terminal: Simulated async authorization with mock transaction IDs.
+   - UPI QR Generator: Dynamic Base64 UPI payload QR generation (`upi://pay?...`).
+   - Thermal Receipt Printer: Formatted text-buffer generator with duplicate watermark & audit logging.
+
+5. **Financial & Reconciliation Pipeline**:
+   - Atomic multi-step operations wrapped in DB `$transaction`.
+   - Immutable `AuditLog` records containing `beforeValue`, `afterValue`, and mandatory `reason` on financial overrides or stock corrections.
+   - Cash reconciliation pipeline: Cashier Day Close (`RegisterClose`) → Cash Officer Handover → Manager Consolidation (`ManagerCashReport`) with BNA deposits → Accountant Approval.

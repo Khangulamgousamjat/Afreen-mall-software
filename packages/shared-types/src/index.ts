@@ -23,11 +23,17 @@ export const RoleName = {
 export type RoleName = (typeof RoleName)[keyof typeof RoleName];
 
 export const SaleType = {
+  RETAIL: 'RETAIL',
+  WHOLESALE: 'WHOLESALE',
+  INSTITUTIONAL: 'INSTITUTIONAL',
+} as const;
+export type SaleType = (typeof SaleType)[keyof typeof SaleType];
+
+export const SaleTypeLabels: Record<SaleType, string> = {
   RETAIL: 'Retail Sale',
   WHOLESALE: 'Wholesale',
   INSTITUTIONAL: 'Institutional',
-} as const;
-export type SaleType = (typeof SaleType)[keyof typeof SaleType];
+};
 
 export const PaymentMode = {
   CASH: 'CASH',

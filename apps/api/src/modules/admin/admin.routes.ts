@@ -1333,10 +1333,15 @@ router.get('/backups/:id/status', async (req: AuthenticatedRequest, res: Respons
 router.post('/backups/:id/restore', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { confirmed } = req.body;
+    const { confirmed, confirmationText } = req.body;
     const backup = backups.find((b) => b.id === id);
     if (!backup) return res.status(404).json({ error: 'Backup not found' });
-    if (!confirmed) return res.status(400).json({ error: 'Restore requires explicit confirmation', requiresConfirmation: true });
+    if (!confirmed || confirmationText !== 'RESTORE') {
+      return res.status(400).json({
+        error: 'Restore requires explicit confirmation and typing the literal string "RESTORE".',
+        requiresConfirmation: true,
+      });
+    }
 
     await prisma.auditLog.create({
       data: {

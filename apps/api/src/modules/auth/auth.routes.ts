@@ -75,7 +75,7 @@ router.post('/login', loginRateLimiter, async (req, res) => {
           userAgent: req.get('user-agent'),
         },
       }).catch((err) => console.error('LoginHistory log error:', err?.message));
-      return res.status(401).json({ error: 'Invalid Password' });
+      return res.status(401).json({ error: 'Invalid Staff ID or Password' });
     }
 
     // 2. Account Lockout Check (15-minute temporary lockout after 5 consecutive failures)
@@ -149,7 +149,7 @@ router.post('/login', loginRateLimiter, async (req, res) => {
       }
 
       return res.status(401).json({
-        error: 'Invalid Password',
+        error: 'Invalid Staff ID or Password',
         remainingAttempts: 5 - newFailedAttempts,
       });
     }
@@ -306,6 +306,64 @@ router.post('/logout', authenticateToken, async (req: AuthenticatedRequest, res:
     return res.json({ message: 'Logged out successfully' });
   } catch {
     return res.json({ message: 'Logged out successfully' });
+  }
+});
+
+// ── Session Refresh Endpoint ────────────────────────────────────────────────
+router.post('/refresh-token', async (req, res) => {
+  try {
+    const refreshToken = req.body?.refreshToken || req.headers['x-refresh-token'];
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    const { jwtSecret, jwtRefreshSecret } = getJwtSecrets();
+    let decoded: any;
+    try {
+      decoded = jwt.verify(refreshToken, jwtRefreshSecret);
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+
+    const session = await prisma.session.findUnique({
+      where: { refreshToken },
+      include: { user: true },
+    });
+
+    if (!session || !session.user || session.expiresAt < new Date()) {
+      return res.status(401).json({ error: 'Session expired or invalidated' });
+    }
+
+    const user = session.user;
+    if (user.isDeactivated || user.isLocked) {
+      return res.status(403).json({ error: 'Account disabled or locked' });
+    }
+
+    const userPayload = {
+      id: user.id,
+      staffId: user.staffId,
+      username: user.username,
+      fullName: user.fullName,
+      role: user.role,
+      mustChangePassword: user.mustChangePassword,
+      canProcessSaleReturn: user.canProcessSaleReturn,
+    };
+
+    const newAccessToken = jwt.sign(userPayload, jwtSecret, { expiresIn: '12h' });
+
+    // Update session token
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { token: newAccessToken },
+    });
+
+    return res.json({
+      token: newAccessToken,
+      user: userPayload,
+    });
+  } catch (err: any) {
+    console.error('Refresh token error:', err);
+    return res.status(500).json({ error: 'Failed to refresh token' });
   }
 });
 

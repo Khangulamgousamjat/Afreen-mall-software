@@ -125,6 +125,10 @@ router.post('/transfer', async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ error: 'Inventory ID, source warehouse, destination warehouse, and valid transfer quantity are required' });
     }
 
+    if (sourceWarehouse.trim().toLowerCase() === destinationWarehouse.trim().toLowerCase()) {
+      return res.status(400).json({ error: 'Source and destination warehouses cannot be the same.' });
+    }
+
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
       include: { product: true },

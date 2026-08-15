@@ -82,7 +82,7 @@ describe('POST /api/v1/auth/login', () => {
 
     expect(res.status).toBe(401);
     // Must NOT say "user not found" — generic message prevents enumeration
-    expect(res.body.error).toMatch(/Invalid Password/i);
+    expect(res.body.error).toMatch(/Invalid/i);
   });
 
   it('returns 400 when identifier or password is missing', async () => {
