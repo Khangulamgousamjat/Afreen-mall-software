@@ -4,12 +4,12 @@
 Afreen Mall is a staff-only, single-tenant retail management system covering the full store lifecycle: POS billing, cash handover/reconciliation, inventory, purchasing, warehouse, B2B sales, supplier/VRM, accounting, HRMS, CRM/loyalty, reporting, BI, and system administration. Designed for shop-floor desktop browsers, packaged for later Electron/Tauri wrapping.
 
 ## System Topology & Layers
-1. **Frontend (`apps/web`)**:
-   - React + TypeScript + Vite.
-   - Vanilla CSS with custom properties (design tokens) supporting Dark (`#0B0F0D`) and Light (`#F0EDE4`) themes.
-   - In-memory access token storage via React AuthContext; refresh token stored via HttpOnly cookie.
-   - Zero browser-exclusive or server-only APIs to ensure direct portability to Electron/Tauri desktop wrappers.
-   - Keyboard-driven POS counter interactions with F1-F12 shortcuts, offline sync queue in `localStorage`.
+1. **Desktop Software & Presentation Layer (`electron/` & `apps/web`)**:
+   - Native Windows PC Desktop Software running via Electron runtime (`AfreenMall.exe`).
+   - Secure IPC Bridge (`electron/preload.ts`) providing direct hardware integration (silent ESC/POS thermal printing, POS kiosk mode, native file save dialogs, network connectivity checks).
+   - React + TypeScript + Vite UI styled with Vanilla CSS design tokens supporting Dark (`#0B0F0D`) and Light (`#F0EDE4`) themes.
+   - Zero external browser dependencies; offline transaction caching with automatic cloud database sync on internet restore.
+   - Dedicated keyboard shortcut registry (F1-F12), USB-HID barcode scanner keyboard wedge listener.
 
 2. **Backend (`apps/api`)**:
    - Node.js with modular Express (or NestJS-style domain modules) under `/api/v1/`.

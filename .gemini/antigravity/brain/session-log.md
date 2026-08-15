@@ -9,3 +9,4 @@
   - `apps/web`: React 18 + Vite + Vanilla CSS design tokens, WCAG focus-visible, keyboard shortcuts registry, offline queue, thermal receipt printing, role-gated sidebar navigation tested.
   - Hardening: Security checklist (§11), unit/integration tests passing, no fake-success in catch blocks, no plaintext credentials in localStorage.
   - Monorepo compilation: `@afreen-mall/shared-types`, `@afreen-mall/api`, and `@afreen-mall/web` all build cleanly with zero type errors.
+  - Native PC Desktop Software: Built Electron desktop layer (`electron/main.ts`, `electron/preload.ts`, `electron/tsconfig.json`, `electron-builder.json`), integrated native Windows thermal receipt printing, POS kiosk mode, OS file export dialogs, and NSIS Windows `.exe` installer configuration. Ready for PC deployment.
